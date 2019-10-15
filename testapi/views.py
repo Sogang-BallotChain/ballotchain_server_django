@@ -7,10 +7,6 @@ from django.shortcuts import render
 
 from django.http import HttpResponse, JsonResponse
 
-
-def index(request):
-    return HttpResponse("Hello, world. You're at the Sogang Univ. ballot chain index.")
-
 def testfunc(request, student_id):
     response = "Not found"
     print(student_id)
