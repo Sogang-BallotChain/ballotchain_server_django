@@ -9,7 +9,7 @@ from django.http import HttpResponse, JsonResponse
 
 def testfunc(request, student_id):
     response = "Not found"
-    print(student_id)
+
     if student_id == "20161596":
         response = "omnipede@naver.com"
     elif student_id == "20161616":
@@ -18,4 +18,4 @@ def testfunc(request, student_id):
         response = "yhatonline@naver.com"
     elif student_id == "20141508":
         response = "pineleaf1215@gmail.com"
-    return JsonResponse({'email': response})
+    return JsonResponse({'email': response, "message": "Hello world!"})
