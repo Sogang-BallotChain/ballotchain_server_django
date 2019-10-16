@@ -11,5 +11,11 @@ def testfunc(request, student_id):
     response = "Not found"
     print(student_id)
     if student_id == "20161596":
-        response = "Seo Hyungyu"
-    return JsonResponse({'name': response});
+        response = "omnipede@naver.com"
+    elif student_id == "20161616":
+        response = "tmd3282@naver.com"
+    elif student_id == "20121650":
+        response = "yhatonline@naver.com"
+    elif student_id == "20141508":
+        response = "pineleaf1215@gmail.com"
+    return JsonResponse({'email': response})
