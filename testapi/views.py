@@ -6,8 +6,14 @@ from django.shortcuts import render
 # Create your views here.
 
 from django.http import HttpResponse, JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 
+@csrf_exempt
 def testfunc(request, student_id):
+
+    if request.method == "POST":
+        return JsonResponse({'email': "Not found because ...", 'message': 'Post request'})
+
     response = "Not found"
 
     if student_id == "20161596":
