@@ -27,9 +27,11 @@ def signup(request):
             user = models.User(email = req_json['email'], password = req_json['password'], eth_pub_key = '', eth_prv_key = '')
             user.save()
 
-            return JsonResponse({"success": 1})
+            return JsonResponse({"success": 1}, status=200)
         except (RuntimeError, NameError):
             return JsonResponse({"success": 0, "message": "Server error"})
+        except (json.decoder.JSONDecodeError):
+            return JsonResponse({"success": 0, "message": "Need json body"})
     
     return JsonResponse({"success": 0, "message": "Use post method instead."})
 
@@ -40,6 +42,8 @@ def signin(request):
         try:
             #TODO: check fields
 
+            # token create
+
             # check user sign up
             req_json = json.loads(request.body.decode("utf-8"))
             rows = models.User.objects.filter(email = req_json["email"], password = req_json["password"])
@@ -47,7 +51,6 @@ def signin(request):
                 return JsonResponse({"success": 0, "message": "No user with such email."})
             else:
                 return JsonResponse({"success": 1})
-
         except (RuntimeError, NameError):
             return JsonResponse({"success": 0, "message": "Server error"})
 
