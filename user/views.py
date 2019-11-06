@@ -47,7 +47,7 @@ def signin(request):
             # check user sign up
             req_json = json.loads(request.body.decode("utf-8"))
             rows = models.User.objects.filter(email = req_json["email"], password = req_json["password"])
-            if (len(rows) < 0):
+            if (len(rows) <= 0):
                 return JsonResponse({"success": 0, "message": "No user with such email."})
             else:
                 return JsonResponse({"success": 1})
