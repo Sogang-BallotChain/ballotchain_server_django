@@ -33,6 +33,8 @@ ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
     'user.apps.UserConfig',
+    'vote.apps.VoteConfig',
+    'userballot',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
