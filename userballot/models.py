@@ -6,3 +6,7 @@ from vote.models import Ballot
 class UserBallot (models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     ballot = models.ForeignKey(Ballot, on_delete=models.CASCADE)
+
+class UserBallotRegister (models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    ballot = models.ForeignKey(Ballot, on_delete=models.CASCADE)

@@ -3,7 +3,7 @@ from django.contrib import admin
 from . import models
 
 class BallotAdmin (admin.ModelAdmin):
-    list_display = ['id', 'candidate_list', 'start_time', 'end_time']
+    list_display = ['id', 'name', 'candidate_list', 'start_time', 'end_time']
 
 admin.site.register(models.Ballot, BallotAdmin)
 

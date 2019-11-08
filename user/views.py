@@ -42,8 +42,6 @@ def signin(request):
         try:
             #TODO: check fields
 
-            # token create
-
             # check user sign up
             req_json = json.loads(request.body.decode("utf-8"))
             rows = models.User.objects.filter(email = req_json["email"], password = req_json["password"])

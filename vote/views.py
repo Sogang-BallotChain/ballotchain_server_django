@@ -4,85 +4,172 @@ from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import auth
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 
 from . import models
 from user.models import User
-from userballot.models import UserBallot
+from userballot.models import UserBallot, UserBallotRegister
 from .models import Ballot
 
 import json
 import datetime
 
-# join <- 투표 참여 확인 <-(컨트랙트 호출)
-# new <- 투표 모델 생성 <- (컨트랙트 배포)
-# 참여한 투표 조회 
-
+# uri vote/register/
 @csrf_exempt
 def register_vote (request):
     if request.method == "POST":
         try:
+            # Field check
             req_json = json.loads(request.body.decode("utf-8"))
+            email = req_json.get('email', None)
+            name = req_json.get('name', None)
+            candidate_list = req_json.get('candidate_list', None)
+            start_time = req_json.get('start_time', None)
+            end_time = req_json.get('end_time', None)
 
-            name = req_json['name']
-            candidate_list = req_json['candidate_list']
-            start_time = req_json['start_time']
-            end_time = req_json['end_time']
+            if ( not email or not name or not candidate_list or not start_time or not end_time ):
+                return JsonResponse({"success": 0, "message": "Incorrect json body"})
 
+            # TODO: Deploy bollot to block chain
+            
+            # Find user with email
+            rows  = User.objects.filter(email = email)
+            if (len(rows) <= 0):
+                return JsonResponse({"success": 0, "message": "No such user"})
+            user = rows[0]
+
+            # Create new ballot
             ballot  = Ballot (
                 name = name, 
-                candidate_list = json.dumps(candidate_list),
+                candidate_list = json.dumps(candidate_list, ensure_ascii=False),
                 start_time = start_time,
                 end_time = end_time
             )
-            
             ballot.save()
-            # jsonDec = json.decoder.JSONDecoder()
-            # l = jsonDec.decode(ballot.candidate_list)
+
+            # User <-> Ballot relation insert
+            ubregister = UserBallotRegister(
+                user = user,
+                ballot = ballot    
+            )
+            ubregister.save()
+
             # str1 = datetime.datetime.fromtimestamp(start_time)
-            return JsonResponse({"message": "Hello world"})
+
+            return JsonResponse({"success": 1})
         except (RuntimeError, NameError):
             return JsonResponse({"success": 0})
+    else:
+        return JsonResponse({"success": 0, "message": "Use post method instead."})
 
+# uri: vote/
 @csrf_exempt
 def join_vote (request):
     if request.method == "POST":
-        req_json = json.loads(request.body.decode("utf-8"))
+        try:
+            # Field check
+            req_json = json.loads(request.body.decode("utf-8"))
+            email = req_json.get('email',None)
+            vote_id = req_json.get('vote_id',None)
+            candidate = req_json.get('candidate',None)
 
-        email = req_json.get('email',None)
-        vote_id = req_json.get('vote_id',None)
-        candidate = req_json.get('candidate',None)
+            if ( not email or not vote_id or not candidate ):
+                return JsonResponse({"success": 0, "message": "Incorrect json body."})
 
-        rows = User.objects.filter(email=email)
-        user = rows[0]
+            # Find user with email
+            rows = User.objects.filter(email=email)
+            if (len(rows) <= 0):
+                return JsonResponse({"success": 0, "message": "No such user."})
+            user = rows[0]
 
-        rows = Ballot.objects.filter(id=vote_id)
-        ballot = rows[0]
+            # Find ballot with vote_id
+            rows = Ballot.objects.filter(id=vote_id)
+            if (len(rows) <= 0):
+                return JsonResponse({"success": 0, "message": "No such ballot."})
+            ballot = rows[0]
 
-        if (email and vote_id and candidate):
-           # print("Here",flush= False)
+            # TODO: Call contract
+
+            # User <-> Ballot join relation insert
             userballot = UserBallot(
                 user = user,
                 ballot = ballot
             )
             userballot.save()
-        # email
-        # 투표 아이디
-        # 누구한테 
-        return JsonResponse({"success": 1})
+            return JsonResponse({"success": 1})
+        except(RuntimeError, NameError):
+            return JsonResponse({"success": 0, "message": "Internal server error."})
     else:
-        return JsonResponse({"success": 0})
+        # Field check
+        req_json = json.loads(request.body.decode("utf-8"))
+        vote_id = req_json.get("vote_id", None)
+        if (not vote_id):
+            return JsonResponse({"success": 0, "message": "Incorrect json body"})
+        
+        # Find ballot with vote_id
+        rows = Ballot.objects.filter(id=vote_id)
+        if (len(rows) <= 0):
+            return JsonResponse({"success": 0, "message": "No such vote"})
 
+        # TODO: 투표 결과  컨트랙트 통해 확인
+        
+        return JsonResponse({
+            "success": 1,
+            "data": {
+                "name": rows[0].name,
+                "candidate_list": json.decoder.JSONDecoder().decode(rows[0].candidate_list),
+                "start_time": rows[0].start_time,
+                "end_time": rows[0].end_time
+            }
+        })
+
+
+# uri /vote/profile/
 @csrf_exempt
 def profile (request):
     if request.method == "POST":
-        req_json = json.loads(request.body.decode("utf-8"))
-        email = req_json.get('email',None)
 
-        rows = User.objects.filter(email=email)
-        user = rows[0]
+        try:
+            # Field check
+            req_json = json.loads(request.body.decode("utf-8"))
+            
+            flag = req_json.get('flag', None)
+            email = req_json.get('email', None)
+            page = req_json.get('page', None)
+            if (not email or not page or not flag):
+                return JsonResponse({"success": 0, "message": "Invalid json body"})
 
-        rows = UserBallot.objects.filter(user=user)
-        print(type(rows))
-        for v in list(rows):
-            print(v,flush = True,sep = ' ')
-        return JsonResponse({"success": 1})
+            # Find user with email
+            rows = User.objects.filter(email=email)
+            if (len(rows) <= 0):
+                return JsonResponse({"success": 0, "message": "No such user"})
+            user = rows[0]
+
+            # Find User <-> Ballot join relation
+            if (flag == "join"):
+                rows = UserBallot.objects.filter(user=user)
+            # Find User <-> Ballot register relation
+            elif (flag == "register"):
+                rows = UserBallotRegister.objects.filter(user=user)
+            else:
+                return JsonResponse({"success": 0, "message": "Flag not defined"})
+
+            if (len(rows) < 0):
+                return JsonResponse({"success": 0, "message": "User haven't joined any vote."})
+
+            # pagination
+            paginator = Paginator(list(rows), 5)
+            try:
+                l = paginator.page(page)
+            except PageNotAnInteger:
+                l = paginator.page(1)
+            except EmptyPage:
+                l = paginator.page(paginator.num_pages)
+            
+            data = []
+            for i in l:
+                data.append(i.ballot.id)
+
+            return JsonResponse({"success": 1, "data": data})
+        except (RuntimeError, NameError):
+            return JsonResponse({"success": 0, "message": "Internal server error."})
