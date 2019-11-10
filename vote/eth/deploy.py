@@ -1,4 +1,8 @@
+import json
+
+from eth_account import Account
 from solc import compile_source
+from web3 import Web3, HTTPProvider
 
 source_code = '''
 pragma solidity >=0.4.22 <0.6.0;
@@ -63,3 +67,21 @@ contract Ballot {
 }
 '''
 
+compiled_sol = compile_source (source_code)
+
+#rpc_url = "http://www.ballotchain.net:8805"
+rpc_url = "https://ropsten.infura.io/v3/49b9acbd693940a0bf84fef21253e244"
+w3 = Web3(HTTPProvider(rpc_url))
+
+account = Account()
+acct = account.privateKeyToAccount("21DF8E8466D4C5B11BE3E1890C45C99A290BC3D7388151CC658BC35885D50F74")
+contract_interface = compiled_sol["<stdin>:Ballot"]
+
+Ballot = w3.eth.contract(abi = contract_interface['abi'], bytecode = contract_interface['bin'], bytecode_runtime = contract_interface['bin-runtime'])
+
+tx_hash = Ballot.constructor(16, 100, 110).buildTransaction({
+    'from': acct.address,
+    'gas': 439686,
+    'gasPrice': w3.toWei('8', 'gwei')
+})
+print(tx_hash)
