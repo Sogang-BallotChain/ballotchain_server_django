@@ -88,7 +88,7 @@ def join_vote (request):
                 return JsonResponse({"success": 0, "message": "No such ballot."})
             ballot = rows[0]
 
-            # TODO: Call contract
+            # TODO: Call contract, if fail, then return success 0
 
             # User <-> Ballot join relation insert
             userballot = UserBallot(

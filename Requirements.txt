@@ -1,2 +1,3 @@
 pip install Django~=2.0.0
 pip install pyjwt --user
+pip install py-solc
