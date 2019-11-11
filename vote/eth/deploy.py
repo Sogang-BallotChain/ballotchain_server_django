@@ -67,6 +67,17 @@ contract Ballot {
 }
 '''
 
+'''
+class BallotContract:
+
+    this.rpc_url = "https://ropsten.infura.io/v3/49b9acbd693940a0bf84fef21253e244"
+
+    def __init__ (private_key, _nCandidates, _start, _end):
+        this.nCandidates = _nCandidates
+        this.start_time = _start
+        this.end_time = _end
+
+'''
 compiled_sol = compile_source (source_code)
 
 #rpc_url = "http://www.ballotchain.net:8805"
@@ -77,11 +88,21 @@ account = Account()
 acct = account.privateKeyToAccount("21DF8E8466D4C5B11BE3E1890C45C99A290BC3D7388151CC658BC35885D50F74")
 contract_interface = compiled_sol["<stdin>:Ballot"]
 
-Ballot = w3.eth.contract(abi = contract_interface['abi'], bytecode = contract_interface['bin'], bytecode_runtime = contract_interface['bin-runtime'])
+Ballot = w3.eth.contract(
+    abi = contract_interface['abi'], 
+    bytecode = contract_interface['bin'], 
+    bytecode_runtime = contract_interface['bin-runtime']
+)
 
-tx_hash = Ballot.constructor(16, 100, 110).buildTransaction({
+construct_txn = Ballot.constructor(16, 100, 110).buildTransaction({
     'from': acct.address,
-    'gas': 439686,
-    'gasPrice': w3.toWei('8', 'gwei')
+    'nonce': w3.eth.getTransactionCount(acct.address),
+    'gas': 3000000,
+    'gasPrice': w3.toWei('15', 'gwei')
 })
-print(tx_hash)
+
+signed = acct.signTransaction(construct_txn)
+
+res = w3.eth.sendRawTransaction(signed.rawTransaction)
+
+print(res.hex())
