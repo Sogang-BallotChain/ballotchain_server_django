@@ -67,42 +67,40 @@ contract Ballot {
 }
 '''
 
-'''
-class BallotContract:
+class Deployer:
 
-    this.rpc_url = "https://ropsten.infura.io/v3/49b9acbd693940a0bf84fef21253e244"
+    rpc_url = "https://ropsten.infura.io/v3/49b9acbd693940a0bf84fef21253e244"
 
-    def __init__ (private_key, _nCandidates, _start, _end):
-        this.nCandidates = _nCandidates
-        this.start_time = _start
-        this.end_time = _end
+    def __init__ (self, _nCandidates, _start, _end):
+        self.nCandidates = _nCandidates
+        self.start_time = _start
+        self.end_time = _end
 
-'''
-compiled_sol = compile_source (source_code)
+    def deploy (self, prv_key):
+        w3 = Web3(HTTPProvider(self.rpc_url))
+        account = Account().privateKeyToAccount(prv_key)
 
-#rpc_url = "http://www.ballotchain.net:8805"
-rpc_url = "https://ropsten.infura.io/v3/49b9acbd693940a0bf84fef21253e244"
-w3 = Web3(HTTPProvider(rpc_url))
+        # Compile source
+        compiled_sol = compile_source (source_code)
+        contract_interface = compiled_sol["<stdin>:Ballot"]
+        Contract = w3.eth.contract (
+            abi = contract_interface['abi'],
+            bytecode = contract_interface['bin'], 
+            bytecode_runtime = contract_interface['bin-runtime']
+        )
 
-account = Account()
-acct = account.privateKeyToAccount("21DF8E8466D4C5B11BE3E1890C45C99A290BC3D7388151CC658BC35885D50F74")
-contract_interface = compiled_sol["<stdin>:Ballot"]
+        # Make transaction
+        construct_txn = Contract.constructor(16, 100, 110).buildTransaction({
+            'from': account.address,
+            'nonce': w3.eth.getTransactionCount(account.address),
+            'gas': 3000000,
+            'gasPrice': w3.toWei('15', 'gwei')
+        })
 
-Ballot = w3.eth.contract(
-    abi = contract_interface['abi'], 
-    bytecode = contract_interface['bin'], 
-    bytecode_runtime = contract_interface['bin-runtime']
-)
+        # sign transaction
+        signed = account.signTransaction(construct_txn)
 
-construct_txn = Ballot.constructor(16, 100, 110).buildTransaction({
-    'from': acct.address,
-    'nonce': w3.eth.getTransactionCount(acct.address),
-    'gas': 3000000,
-    'gasPrice': w3.toWei('15', 'gwei')
-})
+        # send transaction
+        address = w3.eth.sendRawTransaction(signed.rawTransaction)
 
-signed = acct.signTransaction(construct_txn)
-
-res = w3.eth.sendRawTransaction(signed.rawTransaction)
-
-print(res.hex())
+        print(address.hex())
