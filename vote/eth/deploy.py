@@ -37,7 +37,7 @@ class Deployer:
         construct_txn = self.Contract.constructor(16, 100, 110).buildTransaction({
             'from': account.address,
             'nonce': w3.eth.getTransactionCount(account.address),
-            'gas': 439686,
+            'gas': 4396860,
             'gasPrice': w3.toWei('15', 'gwei')
         })
 
@@ -55,10 +55,10 @@ class Deployer:
         w3 = Web3(HTTPProvider(self.rpc_url))
         account = Account().privateKeyToAccount(sender_prv_key)
         contract_instance = self.Contract(contract_address)
-        txn = contract_instance.functions.vote(1).buildTransaction({
+        txn = contract_instance.functions.vote(vote_to).buildTransaction({
             'from': account.address,
             'nonce': w3.eth.getTransactionCount(account.address),
-            'gas': 439686,
+            'gas': 4396860,
             'gasPrice': w3.toWei('15', 'gwei')
         })
         signed = account.signTransaction(txn)
@@ -71,11 +71,26 @@ class Deployer:
         contract_instance = self.Contract(contract_address)
         return contract_instance.functions.showWinner().call()
 
+    def endBallot (self, contract_address, sender_prv_key):
+        w3 = Web3(HTTPProvider(self.rpc_url))
+        account = Account().privateKeyToAccount(sender_prv_key)
+        contract_instance = self.Contract(contract_address)
+        txn = contract_instance.functions.endBallot().buildTransaction({
+            'from': account.address,
+            'nonce': w3.eth.getTransactionCount(account.address),
+            'gas': 4396860,
+            'gasPrice': w3.toWei('15', 'gwei')
+        })
+        signed = account.signTransaction(txn)
+        tx_hash = w3.eth.sendRawTransaction(signed.rawTransaction)
+        tx_receipt = w3.eth.waitForTransactionReceipt(tx_hash)
+        print(tx_receipt)
+
 '''
 ballotContract = Deployer(16, 1573481503  , 1573481603  )
 addr = ballotContract.deploy("21DF8E8466D4C5B11BE3E1890C45C99A290BC3D7388151CC658BC35885D50F74")
 print(addr)
 ballotContract.vote(addr, "21DF8E8466D4C5B11BE3E1890C45C99A290BC3D7388151CC658BC35885D50F74", 7)
-winner = ballotContract.showWinner(addr)
-print(winner)
+ballotContract.endBallot(addr, "21DF8E8466D4C5B11BE3E1890C45C99A290BC3D7388151CC658BC35885D50F74")
+print( ballotContract.showWinner(addr) )
 '''
