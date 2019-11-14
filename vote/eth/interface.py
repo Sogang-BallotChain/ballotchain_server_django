@@ -4,7 +4,7 @@ from eth_account import Account
 from solc import compile_source
 from web3 import Web3, HTTPProvider
 
-import config
+from . import config
 
 if __name__ == '__main__':
     import src
@@ -103,6 +103,7 @@ class BallotContract:
         tx_receipt = self.w3.eth.waitForTransactionReceipt(tx_hash)
         return tx_receipt['status']
 
+'''
 deployer = Deployer(16,1573481503, 1573481603 )
 addr = deployer.deploy("21DF8E8466D4C5B11BE3E1890C45C99A290BC3D7388151CC658BC35885D50F74")
 print(addr)
@@ -111,3 +112,4 @@ ballotContract = BallotContract(addr, "21DF8E8466D4C5B11BE3E1890C45C99A290BC3D73
 ballotContract.vote(7)
 ballotContract.endBallot()
 print(ballotContract.getWinner())
+'''

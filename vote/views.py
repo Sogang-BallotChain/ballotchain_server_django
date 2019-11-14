@@ -12,6 +12,7 @@ from userballot.models import UserBallot, UserBallotRegister
 from .models import Ballot
 
 from .eth.interface import Deployer 
+from .eth import config
 
 import json
 import datetime
@@ -21,7 +22,6 @@ import datetime
 def register_vote (request):
     if request.method == "POST":
         try:
-            print(request.body)
             # Field check
             req_json = json.loads(request.body.decode("utf-8"))
 
@@ -33,22 +33,24 @@ def register_vote (request):
 
             if ( not email or not name or not candidate_list or not start_time or not end_time ):
                 return JsonResponse({"success": 0, "message": "Incorrect json body"})
-
-            # TODO: Deploy bollot to block chain
-            #Deployer(len(candidate_list), start_time, end_time).deploy("21DF8E8466D4C5B11BE3E1890C45C99A290BC3D7388151CC658BC35885D50F74")
-
+            
             # Find user with email
             rows  = User.objects.filter(email = email)
             if (len(rows) <= 0):
                 return JsonResponse({"success": 0, "message": "No such user"})
             user = rows[0]
 
+             # TODO: Deploy bollot to block chain
+            deployer = Deployer(len(candidate_list), start_time, end_time)
+            address = deployer.deploy(config.master)
+
             # Create new ballot
             ballot  = Ballot (
                 name = name, 
                 candidate_list = json.dumps(candidate_list, ensure_ascii=False),
                 start_time = start_time,
-                end_time = end_time
+                end_time = end_time,
+                address = address
             )
             ballot.save()
 
@@ -59,11 +61,9 @@ def register_vote (request):
             )
             ubregister.save()
 
-            # str1 = datetime.datetime.fromtimestamp(start_time)
-
             return JsonResponse({"success": 1})
-        except (RuntimeError, NameError):
-            return JsonResponse({"success": 0})
+        except (RuntimeError, NameError, ValueError):
+            return JsonResponse({"success": 0, "message": "Internal server error"})
     else:
         return JsonResponse({"success": 0, "message": "Use post method instead."})
 
