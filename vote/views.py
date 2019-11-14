@@ -11,7 +11,7 @@ from user.models import User
 from userballot.models import UserBallot, UserBallotRegister
 from .models import Ballot
 
-from .eth.deploy import Deployer 
+from .eth.interface import Deployer 
 
 import json
 import datetime
@@ -21,8 +21,10 @@ import datetime
 def register_vote (request):
     if request.method == "POST":
         try:
+            print(request.body)
             # Field check
             req_json = json.loads(request.body.decode("utf-8"))
+
             email = req_json.get('email', None)
             name = req_json.get('name', None)
             candidate_list = req_json.get('candidate_list', None)
@@ -33,7 +35,7 @@ def register_vote (request):
                 return JsonResponse({"success": 0, "message": "Incorrect json body"})
 
             # TODO: Deploy bollot to block chain
-            Deployer(len(candidate_list), start_time, end_time).deploy("21DF8E8466D4C5B11BE3E1890C45C99A290BC3D7388151CC658BC35885D50F74")
+            #Deployer(len(candidate_list), start_time, end_time).deploy("21DF8E8466D4C5B11BE3E1890C45C99A290BC3D7388151CC658BC35885D50F74")
 
             # Find user with email
             rows  = User.objects.filter(email = email)
