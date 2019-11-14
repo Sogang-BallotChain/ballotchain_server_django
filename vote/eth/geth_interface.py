@@ -31,30 +31,33 @@ class Deployer:
             bytecode_runtime = contract_interface['bin-runtime']
         )
 
-    def deploy (self, prv_key):
+    def deploy (self, pub_key, password):
+        
         w3 = Web3(HTTPProvider(self.rpc_url))
-        account = Account().privateKeyToAccount(prv_key)
-       
+        pub_key = w3.toChecksumAddress(pub_key)
+        w3.geth.personal.unlockAccount(pub_key, password)
+        
         # Make transaction
         construct_txn = self.Contract.constructor(self.nCandidates, self.start_time, self.end_time).buildTransaction({
-            'from': account.address,
-            'nonce': w3.eth.getTransactionCount(account.address),
-            'gas': 4396860,
+            'from': pub_key,
+            'nonce': w3.eth.getTransactionCount(pub_key),
+            'gas': 5000,
             'gasPrice': w3.toWei('15', 'gwei')
         })
-
+        
         # sign transaction
-        signed = account.signTransaction(construct_txn)
-
-        # send transaction
-        tx_hash = w3.eth.sendRawTransaction(signed.rawTransaction)
+        tx_hash = w3.eth.sendTransaction(construct_txn)
         tx_receipt = w3.eth.waitForTransactionReceipt(tx_hash)
         address = tx_receipt['contractAddress']
 
         return address
+        
+deployer = Deployer(16, 100, 200)
+deployer.deploy(config.geth_master, config.geth_password)
 
+'''
 class BallotContract:
-    def __init__ (self, _address, sender_prv_key):
+    def __init__ (self, _address):
         # Compile source code
         self.w3 = Web3(HTTPProvider(config.rpc_url))
         compiled_sol = compile_source (src.code)
@@ -69,9 +72,6 @@ class BallotContract:
 
         # Get contract instance
         self.contract = Contract(_address)
-
-        # unlock account
-        self.account = Account().privateKeyToAccount(sender_prv_key)
         
     def vote(self, vote_to):
         txn = self.contract.functions.vote(vote_to).buildTransaction({
@@ -102,13 +102,4 @@ class BallotContract:
         tx_hash = self.w3.eth.sendRawTransaction(signed.rawTransaction)
         tx_receipt = self.w3.eth.waitForTransactionReceipt(tx_hash)
         return tx_receipt['status']
-
-
-deployer = Deployer(16,1573481503, 1573481603 )
-addr = deployer.deploy("21DF8E8466D4C5B11BE3E1890C45C99A290BC3D7388151CC658BC35885D50F74")
-print(addr)
-
-ballotContract = BallotContract(addr, "21DF8E8466D4C5B11BE3E1890C45C99A290BC3D7388151CC658BC35885D50F74")
-ballotContract.vote(7)
-ballotContract.endBallot()
-print(ballotContract.getWinner())
+'''
