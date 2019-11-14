@@ -8,23 +8,40 @@ from django.contrib import auth
 from . import models
 import json
 
+from web3 import Web3, HTTPProvider
+from vote.eth import config
+
 #signup
 @csrf_exempt
 def signup(request):
     if request.method == "POST":
         try:
-            # TODO: Field check
-
             # Parse body
             req_json = json.loads(request.body.decode("utf-8"))
+
+            # Field check
+            email = req_json.get('email', None)
+            password = req_json.get('password', None)
+
+            if (not email or not password):
+                return JsonResponse({"success" : 0, "message": "Invalid json body"})
 
             # Duplicate user
             row = models.User.objects.filter(email = req_json['email'])
             if (len(row) > 0):
                 return JsonResponse({"success": 0, "message": "Duplicate user"})
 
+            # Make public key and private key
+            w3 = Web3(HTTPProvider(config.rpc_url))
+            pub_key = w3.eth.account.create(password).address
+            
             # Create new user 
-            user = models.User(email = req_json['email'], password = req_json['password'], eth_pub_key = '', eth_prv_key = '')
+            user = models.User(
+                email = email, 
+                password = password, 
+                eth_pub_key = pub_key, 
+                eth_prv_key = ''
+            )
             user.save()
 
             return JsonResponse({"success": 1}, status=200)
