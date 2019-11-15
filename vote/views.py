@@ -80,7 +80,7 @@ def join_vote (request):
             vote_id = req_json.get('vote_id',None)
             candidate = req_json.get('candidate',None)
 
-            if ( not email or not vote_id or not candidate ):
+            if ( not email or not vote_id or candidate is None ):
                 return JsonResponse({"success": 0, "message": "Incorrect json body."})
 
             # Find user with email
