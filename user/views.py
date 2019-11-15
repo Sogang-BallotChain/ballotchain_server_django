@@ -33,14 +33,17 @@ def signup(request):
 
             # Make public key and private key
             w3 = Web3(HTTPProvider(config.rpc_url))
-            pub_key = w3.eth.account.create(password).address
+            account = w3.eth.account.create(password)
+            pub_key = account.address
+            prv_key = account.privateKey.hex()
+            #pub_key = w3.geth.personal.newAccount(password)
             
             # Create new user 
             user = models.User(
                 email = email, 
                 password = password, 
                 eth_pub_key = pub_key, 
-                eth_prv_key = ''
+                eth_prv_key = prv_key
             )
             user.save()
 

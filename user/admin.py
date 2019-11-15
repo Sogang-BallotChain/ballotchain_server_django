@@ -4,6 +4,6 @@ from django.contrib import admin
 from . import models
 
 class UserAdmin (admin.ModelAdmin):
-    list_display = ['id', 'email', 'password', 'eth_pub_key']
+    list_display = ['id', 'email', 'password', 'eth_pub_key', 'eth_prv_key']
 
 admin.site.register(models.User, UserAdmin)
