@@ -3,6 +3,6 @@ pip install pyjwt --user
 pip install py-solc
 pip install web3
 
-sudo add-apt-repository ppa:ethereum/ethereum
-sudo apt-get update
-sudo apt-get install solc
+python3
+>> from solc import install_solc
+>> install_solc('v0.4.24')
