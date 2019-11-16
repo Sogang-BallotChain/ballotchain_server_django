@@ -85,6 +85,9 @@ class BallotContract:
         tx_receipt = self.w3.eth.waitForTransactionReceipt(tx_hash)
         return tx_receipt['status']
 
+    def isEnded(self):
+        return self.contract.functions.isEnded().call()
+
     def getWinner(self):
         return self.contract.functions.showWinner().call()
 

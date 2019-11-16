@@ -140,18 +140,23 @@ def join_vote (request):
             return JsonResponse({"success": 0, "message": "No such vote"})
         ballot = rows[0]
 
-        # 투표 결과  컨트랙트 통해 확인
-        ts = datetime.datetime.now().timestamp()
-        is_ended = False
-        winner = ""
+        # 투표 시간 지났으면 투표 종료시킴
+        current_time = datetime.datetime.now().timestamp()
+        ballotContract = BallotContract(ballot.address, config.master)
+        is_ended = ballotContract.isEnded()
         candidate_list = json.decoder.JSONDecoder().decode(rows[0].candidate_list)
-        if (ts > ballot.end_time):
-            is_ended = True
-            ballotContract = BallotContract(ballot.address, config.master)
+        if (current_time > ballot.end_time and is_ended is False):
             ballotContract.endBallot()
+
+        # 투표 결과 컨트랙트 통해 확인
+        is_ended = ballotContract.isEnded()
+        if (is_ended is False):
+            winner = ""
+        else:
             winner = candidate_list[ballotContract.getWinner()]
 
         # TODO: refactor code
+        # return json response
         return JsonResponse({
             "success": 1,
             "data": {
