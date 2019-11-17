@@ -4,12 +4,8 @@ from eth_account import Account
 from solc import compile_source
 from web3 import Web3, HTTPProvider
 
-if __name__ == '__main__':
-    import src
-    import config
-else:
-    from . import src
-    from . import config
+from . import src
+from . import config
 
 class Deployer:
 
@@ -52,8 +48,8 @@ class Deployer:
 
         return address
         
-deployer = Deployer(16, 100, 200)
-deployer.deploy(config.geth_master, config.geth_password)
+#deployer = Deployer(16, 100, 200)
+#deployer.deploy(config.geth_master, config.geth_password)
 
 '''
 class BallotContract:
