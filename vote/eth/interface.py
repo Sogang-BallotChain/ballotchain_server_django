@@ -19,7 +19,7 @@ def requestGas (pub_key):
     eth_amount = w3.fromWei(balance, 'ether')
     print(eth_amount)
     # If user have already much ehter, pass
-    if (eth_amount > 1.0):
+    if (eth_amount >= 0.8):
         return 1
     # else, request user from faucet
     else:
@@ -107,5 +107,5 @@ class BallotContract:
     def getWinner(self):
         return self.contract.functions.showWinner().call()
 
-    def getResults(self):
-        pass
+    def getVoteCount(self, idx):
+        return self.contract.functions.showVoteCount(idx).call()

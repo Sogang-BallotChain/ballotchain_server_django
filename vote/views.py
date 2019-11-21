@@ -42,9 +42,14 @@ def register_vote (request):
                 return JsonResponse({"success": 0, "message": "No such user"})
             user = rows[0]
 
-             # Deploy bollot to block chain
+            # Get gas from faucet
+            request_gas = requestGas(user.eth_pub_key)
+            if (request_gas == 0):
+                return JsonResponse({"success": 0, "message": "Faucet error"})
+
+            # Deploy bollot to block chain
             deployer = Deployer(len(candidate_list), start_time, end_time)
-            address = deployer.deploy(config.master)
+            address = deployer.deploy(user.eth_prv_key)
 
             # Create new ballot
             ballot  = Ballot (
@@ -96,20 +101,9 @@ def join_vote (request):
             ballot = rows[0]
 
             # Get gas from faucet
-            w3 = Web3(HTTPProvider(config.rpc_url))
-            account = Account().privateKeyToAccount(config.master)
-       
-            signed_txn = account.signTransaction({
-                'nonce': w3.eth.getTransactionCount(account.address),
-                'gas': 21000,
-                'gasPrice': w3.toWei('20', 'gwei'),
-                'to': user.eth_pub_key,
-                'value': w3.toWei('65952900', 'gwei')
-            })
-            
-            tx_hash = w3.eth.sendRawTransaction(signed_txn.rawTransaction)
-            tx_receipt = w3.eth.waitForTransactionReceipt(tx_hash)
-            print(tx_receipt)
+            request_gas = requestGas(user.eth_pub_key)
+            if (request_gas == 0):
+                return JsonResponse({"success": 0, "message": "Faucet error"})
             
             # Call contract, if fail, then return success 0
             ballotContract = BallotContract(ballot.address, user.eth_prv_key)
@@ -148,12 +142,15 @@ def join_vote (request):
 
         ballotContract = BallotContract(ballot.address, config.master)
         candidate_list = json.decoder.JSONDecoder().decode(rows[0].candidate_list)
+        vote_result = {}
 
         # 투표 결과 컨트랙트 통해 확인
         if (is_ended is False):
             winner = ""
         else:
             winner = candidate_list[ballotContract.getWinner()]
+            for i in range(0, len(candidate_list)):
+                vote_result[candidate_list[i]] = ballotContract.getVoteCount(i)
 
         # return json response
         return JsonResponse({
@@ -164,7 +161,8 @@ def join_vote (request):
                 "start_time": rows[0].start_time,
                 "end_time": rows[0].end_time,
                 "is_ended": is_ended,
-                "winner": winner
+                "winner": winner,
+                "result": vote_result
             }
         })
 
