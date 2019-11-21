@@ -1,4 +1,5 @@
 import json
+import requests
 
 from eth_account import Account
 from solc import compile_source
@@ -7,7 +8,28 @@ from web3 import Web3, HTTPProvider
 from . import src
 from . import config
 
+# Request gas from faucet
+def requestGas (pub_key):
 
+    # init web3
+    w3 = Web3(HTTPProvider(config.rpc_url))
+
+    # Check balance
+    balance = w3.eth.getBalance(pub_key)
+    eth_amount = w3.fromWei(balance, 'ether')
+    print(eth_amount)
+    # If user have already much ehter, pass
+    if (eth_amount > 1.0):
+        return 1
+    # else, request user from faucet
+    else:
+        res = requests.post(config.faucet_url, data=pub_key, headers={'Content-Type': 'text/plain'})
+        if (res.status_code == 200):
+            w3.eth.waitForTransactionReceipt(res.text)
+            return 1
+        else:
+            return 0
+    
 class Deployer:
 
     rpc_url = config.rpc_url
@@ -82,23 +104,8 @@ class BallotContract:
         tx_receipt = self.w3.eth.waitForTransactionReceipt(tx_hash)
         return tx_receipt['status']
 
-    def isEnded(self):
-        return self.contract.functions.isEnded().call()
-
     def getWinner(self):
         return self.contract.functions.showWinner().call()
 
     def getResults(self):
         pass
-
-    def endBallot (self):
-        txn = self.contract.functions.endBallot().buildTransaction({
-            'from': self.account.address,
-            'nonce': self.w3.eth.getTransactionCount(self.account.address),
-            'gas': 4396860,
-            'gasPrice': self.w3.toWei('15', 'gwei')
-        })
-        signed = self.account.signTransaction(txn)
-        tx_hash = self.w3.eth.sendRawTransaction(signed.rawTransaction)
-        tx_receipt = self.w3.eth.waitForTransactionReceipt(tx_hash)
-        return tx_receipt['status']

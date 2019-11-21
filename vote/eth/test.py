@@ -1,8 +1,17 @@
 from . import config
-from .interface import Deployer, BallotContract
+from .interface import Deployer, BallotContract, requestGas
 from eth_account import Account
 from web3 import Web3, HTTPProvider
 
+w3 = Web3(HTTPProvider(config.rpc_url))
+
+account = w3.eth.account.create("12345")
+print(account.address)
+requestGas(account.address)
+
+b = w3.eth.getBalance(account.address)
+print(b)
+'''
 w3 = Web3(HTTPProvider(config.rpc_url))
 
 account = w3.eth.account.create("1234566")
@@ -41,3 +50,4 @@ ballotContract = BallotContract (addr, "0x41c5c3326bb54c3fad0192672805f8e69d8d36
 ballotContract.endBallot()
 x = ballotContract.getWinner()
 print(x)
+'''

@@ -13,7 +13,7 @@ from .models import Ballot
 
 from eth_account import Account
 from web3 import Web3, HTTPProvider
-from .eth.interface import Deployer, BallotContract
+from .eth.interface import Deployer, BallotContract, requestGas
 from .eth import config
 
 import json
@@ -95,7 +95,7 @@ def join_vote (request):
                 return JsonResponse({"success": 0, "message": "No such ballot."})
             ballot = rows[0]
 
-            # TODO: Get gas fee from master
+            # Get gas from faucet
             w3 = Web3(HTTPProvider(config.rpc_url))
             account = Account().privateKeyToAccount(config.master)
        
@@ -140,22 +140,21 @@ def join_vote (request):
             return JsonResponse({"success": 0, "message": "No such vote"})
         ballot = rows[0]
 
-        # 투표 시간 지났으면 투표 종료시킴
+        # 투표 시간 지났는지 확인
+        is_ended = False
         current_time = datetime.datetime.now().timestamp()
+        if (current_time > ballot.end_time):
+            is_ended = True
+
         ballotContract = BallotContract(ballot.address, config.master)
-        is_ended = ballotContract.isEnded()
         candidate_list = json.decoder.JSONDecoder().decode(rows[0].candidate_list)
-        if (current_time > ballot.end_time and is_ended is False):
-            ballotContract.endBallot()
 
         # 투표 결과 컨트랙트 통해 확인
-        is_ended = ballotContract.isEnded()
         if (is_ended is False):
             winner = ""
         else:
             winner = candidate_list[ballotContract.getWinner()]
 
-        # TODO: refactor code
         # return json response
         return JsonResponse({
             "success": 1,
