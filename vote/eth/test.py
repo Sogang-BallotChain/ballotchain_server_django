@@ -5,10 +5,8 @@ from web3 import Web3, HTTPProvider
 
 w3 = Web3(HTTPProvider(config.rpc_url))
 
-account = w3.eth.account.create("12345")
+account = Account.privateKeyToAccount("0x41c5c3326bb54c3fad0192672805f8e69d8d368c1545805655935d58a0db497e")
 print(account.address)
-requestGas(account.address)
-
 b = w3.eth.getBalance(account.address)
 print(b)
 '''
