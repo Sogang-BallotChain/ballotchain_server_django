@@ -74,6 +74,48 @@ def register_vote (request):
     else:
         return JsonResponse({"success": 0, "message": "Use post method instead."})
 
+# uri: vote/{vote_id}
+def info (request, vote_id):
+
+    # Find ballot with vote_id
+    rows = Ballot.objects.filter(id=vote_id)
+    if (len(rows) <= 0):
+        return JsonResponse({"success": 0, "message": "No such vote"})
+    ballot = rows[0]
+
+    # 투표 시간 지났는지 확인
+    is_ended = False
+    current_time = datetime.datetime.now().timestamp()
+    if (current_time > ballot.end_time):
+        is_ended = True
+
+    ballotContract = BallotContract(ballot.address, config.master)
+    candidate_list = json.decoder.JSONDecoder().decode(
+        rows[0].candidate_list)
+    vote_result = {}
+
+    # 투표 결과 컨트랙트 통해 확인
+    if (is_ended is False):
+        winner = ""
+    else:
+        winner = candidate_list[ballotContract.getWinner()]
+        for i in range(0, len(candidate_list)):
+            vote_result[candidate_list[i]] = ballotContract.getVoteCount(i)
+
+    # return json response
+    return JsonResponse({
+        "success": 1,
+        "data": {
+            "name": rows[0].name,
+            "candidate_list": json.decoder.JSONDecoder().decode(rows[0].candidate_list),
+            "start_time": rows[0].start_time,
+            "end_time": rows[0].end_time,
+            "is_ended": is_ended,
+            "winner": winner,
+            "result": vote_result
+        }
+    })
+
 # uri: vote/
 @csrf_exempt
 def join_vote (request):
