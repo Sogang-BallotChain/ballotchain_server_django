@@ -122,3 +122,14 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
+
+
+# 이메일 인증 세팅
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'ballotchain@gmail.com'
+EMAIL_HOST_PASSWORD = 'ballot1234'
+SERVER_EMAIL = 'ballotchain@gmail.com'
+DEFAULT_FROM_MAIL = 'ballotchain@gmail.com'
+EMAIL_USE_TLS = True 

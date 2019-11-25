@@ -9,7 +9,7 @@ from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from . import models
 from user.models import User
 from userballot.models import UserBallot, UserBallotRegister
-from .models import Ballot
+from .models import Ballot, Verification
 
 from eth_account import Account
 from web3 import Web3, HTTPProvider
@@ -18,6 +18,10 @@ from .eth import config
 
 import json
 import datetime
+
+from django.core.mail import EmailMessage
+import random
+import time
 
 # uri vote/register/
 @csrf_exempt
@@ -258,3 +262,41 @@ def profile (request):
             return JsonResponse({"success": 1, "data": data})
         except (RuntimeError, NameError):
             return JsonResponse({"success": 0, "message": "Internal server error."})
+
+@csrf_exempt
+def verification (request):
+    if request.method == "POST":
+        req_json = json.loads(request.body.decode("utf-8"))
+        random.seed(time.time())
+        random_number = random.randint(0,10000)
+        email = EmailMessage('{}님 투표 인증 번호입니다.'.format(req_json.get('email',None)),'{}님의 투표인증 번호는 {:04d}입니다'.format(req_json.get('email'),random_number), to=[req_json['email']])
+        email.send()
+        var_verification  = Verification (
+                email = req_json.get('email',None),
+                code = random_number,
+                start_time = req_json.get('start_time',None),
+                end_time = req_json.get('end_time',None)
+            )
+        var_verification.save()
+        return JsonResponse({"success": 1})
+
+from datetime import datetime,timedelta
+@csrf_exempt
+def check_verification (request):
+    if request.method == "POST":
+        req_json = json.loads(request.body.decode("utf-8"))
+        rows = Verification.objects.filter(email=req_json.get('email',None))
+        if len(rows)<=0:
+             return JsonResponse({"success":0,"message": "No first email is matched!"})
+        current_time = time.time()
+        for i in rows:
+            diff = current_time-i.end_time
+            if diff>600:
+                Verification.objects.filter(end_time=i.end_time).delete()
+        rows = Verification.objects.filter(email=req_json.get('email',None))
+        if len(rows)<=0:
+             return JsonResponse({"success":0,"message": "No verfication code exsits!"})
+        if rows[len(rows)-1].code == req_json.get('code',None):
+            return JsonResponse({"success": 1,"message":"verification is completed!"})
+        else:
+            return JsonResponse({"success":0,"message":"verification code is wrong"})

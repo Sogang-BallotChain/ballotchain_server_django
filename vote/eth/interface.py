@@ -102,8 +102,9 @@ class BallotContract:
         signed = self.account.signTransaction(txn)
         tx_hash = self.w3.eth.sendRawTransaction(signed.rawTransaction)
         tx_receipt = self.w3.eth.waitForTransactionReceipt(tx_hash)
-        return tx_receipt['status']
-
+        print(tx_receipt)
+        print(tx_receipt['blockHash'])
+        return 1
     def getWinner(self):
         return self.contract.functions.showWinner().call()
 
