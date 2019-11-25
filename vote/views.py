@@ -89,7 +89,7 @@ def info (request, vote_id):
 
     # 투표 시간 지났는지 확인
     is_ended = False
-    current_time = datetime.datetime.now().timestamp()
+    current_time = datetime.now().timestamp()
     if (current_time > ballot.end_time):
         is_ended = True
 
@@ -146,6 +146,11 @@ def join_vote (request):
                 return JsonResponse({"success": 0, "message": "No such ballot."})
             ballot = rows[0]
 
+            # Check whether user already voted
+            rows = UserBallot.objects.filter(user=user, ballot=ballot)
+            if (len(rows) > 0):
+                return JsonResponse({"success": 0, "message": "Duplicate voting"})
+
             # Get gas from faucet
             request_gas = requestGas(user.eth_pub_key)
             if (request_gas == 0):
@@ -182,7 +187,7 @@ def join_vote (request):
 
         # 투표 시간 지났는지 확인
         is_ended = False
-        current_time = datetime.datetime.now().timestamp()
+        current_time = datetime.now().timestamp()
         if (current_time > ballot.end_time):
             is_ended = True
 

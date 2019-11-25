@@ -15,7 +15,7 @@ faucet_url = "http://www.ballotchain.net:9000"
 '''
 
 # Node1 configuration
-# pub_key -> 0x2d1C36bfdFf49290Daa4F1CC66F3a61963f6d9A2
+# pub_key -> 0x2d1C36bfdFf49290Daa4F1CC66F3a61963f6d9A2, 0x569519ba44a386951f7212842e4e405b2d342a14 (locals-faucet)
 rpc_url = "http://44.227.84.27:8805"
 master = "0x79144f818edcafb2827098b9bd370839990c6fde28f4756d62342dec2a92c1f2"
 faucet_url = "http://44.227.84.27:9000"
