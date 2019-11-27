@@ -11,17 +11,34 @@ from . import config
 # Request gas from faucet
 def requestGas (pub_key):
 
+    def _requestGas(addr):
+        coinbase = "0x6b082d847a9f469ca2eba8e19bc2d3a8c3a2dcee"
+        w3 = Web3(HTTPProvider(config.rpc_url))
+        w3.geth.personal.unlockAccount(Web3.toChecksumAddress(coinbase), "ballotchain", 1000)
+        tx_hash = w3.eth.sendTransaction({
+            'from': Web3.toChecksumAddress(coinbase),
+            'to': addr,
+            'gas': 4396860,
+            'gasPrice': w3.toWei('15', 'gwei'),
+            'value': w3.toWei(1,'ether')
+        })
+        tx_receipt = w3.eth.waitForTransactionReceipt(tx_hash)
+
     # init web3
     w3 = Web3(HTTPProvider(config.rpc_url))
 
-    # Check balance
+    # Check balance of pub_key
     balance = w3.eth.getBalance(pub_key)
     eth_amount = w3.fromWei(balance, 'ether')
-    print(eth_amount)
+
     # If user have already much ehter, pass
     if (eth_amount >= 0.8):
         return 1
     # else, request user from faucet
+    else:
+        _requestGas(pub_key)
+        return 1
+    '''
     else:
         res = requests.post(config.faucet_url, data=pub_key, headers={'Content-Type': 'text/plain'})
         if (res.status_code == 200):
@@ -29,6 +46,7 @@ def requestGas (pub_key):
             return 1
         else:
             return 0
+    '''
     
 class Deployer:
 
@@ -105,6 +123,7 @@ class BallotContract:
         print(tx_receipt)
         print(tx_receipt['blockHash'])
         return 1
+        
     def getWinner(self):
         return self.contract.functions.showWinner().call()
 

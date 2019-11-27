@@ -28,12 +28,10 @@ print(tx_receipt)
 '''
 
 def _requestGas(addr):
-    # TODO: check 이더 충분한지
-
     w3 = Web3(HTTPProvider(config.rpc_url))
-    w3.geth.personal.unlockAccount(Web3.toChecksumAddress("0x85c639212da33b0e1029f3f016b2a84f620adaae"), "ballotchain", 1000)
+    w3.geth.personal.unlockAccount(Web3.toChecksumAddress("0x09cdb894965c0a4ff26309ba0964ce556a732132"), "ballotchain", 1000)
     tx_hash = w3.eth.sendTransaction({
-        'from': Web3.toChecksumAddress("0x85c639212da33b0e1029f3f016b2a84f620adaae"),
+        'from': Web3.toChecksumAddress("0x09cdb894965c0a4ff26309ba0964ce556a732132"),
         'to': addr,
         'gas': 4396860,
         'gasPrice': w3.toWei('15', 'gwei'),
@@ -48,5 +46,6 @@ for i in range(5):
     t = threading.Thread(target=_requestGas, args=('0x71bA9810B39a276228B7749EbdB7CA59C6a12d10',))
     t.start()
 '''
-x = w3.eth.getBalance("0x71bA9810B39a276228B7749EbdB7CA59C6a12d10")
+x = w3.eth.getBalance("0x2e3dd28F652ba1327E9963251C31516699016133")
+_requestGas("0x2e3dd28F652ba1327E9963251C31516699016133")
 print(x)

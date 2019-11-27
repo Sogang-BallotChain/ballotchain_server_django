@@ -217,7 +217,6 @@ def join_vote (request):
             }
         })
 
-
 # uri /vote/profile/
 @csrf_exempt
 def profile (request):
@@ -274,11 +273,15 @@ def verification (request):
         req_json = json.loads(request.body.decode("utf-8"))
         random.seed(time.time())
         random_number = random.randint(0,10000)
-        email = EmailMessage('{}님 투표 인증 번호입니다.'.format(req_json.get('email',None)),'{}님의 투표인증 번호는 {:04d}입니다'.format(req_json.get('email'),random_number), to=[req_json['email']])
+        email = EmailMessage(
+            '{}님 투표 인증 번호입니다.'.format(req_json.get('email',None)),
+            '{}님의 투표인증 번호는 {:04d}입니다'.format(req_json.get('email'),random_number),
+             to=[req_json['email']]
+        )
         email.send()
         var_verification  = Verification (
                 email = req_json.get('email',None),
-                code = random_number,
+                code = "{0:0=4d}".format(random_number),
                 start_time = req_json.get('start_time',None),
                 end_time = req_json.get('end_time',None)
             )
