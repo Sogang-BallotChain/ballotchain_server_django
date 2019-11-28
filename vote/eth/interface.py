@@ -59,6 +59,7 @@ class Deployer:
 
         # Compile source
         w3 = Web3(HTTPProvider(self.rpc_url))
+
         compiled_sol = compile_source (src.code)
         contract_interface = compiled_sol["<stdin>:Ballot"]
         

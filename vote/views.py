@@ -89,7 +89,7 @@ def info (request, vote_id):
 
     # 투표 시간 지났는지 확인
     is_ended = False
-    current_time = datetime.now().timestamp()
+    current_time = (datetime.now().timestamp() + 9 * 60 * 60) * 1000
     if (current_time > ballot.end_time):
         is_ended = True
 
@@ -114,6 +114,7 @@ def info (request, vote_id):
             "candidate_list": json.decoder.JSONDecoder().decode(rows[0].candidate_list),
             "start_time": rows[0].start_time,
             "end_time": rows[0].end_time,
+            "address": rows[0].address,
             "is_ended": is_ended,
             "winner": winner,
             "result": vote_result
@@ -187,7 +188,8 @@ def join_vote (request):
 
         # 투표 시간 지났는지 확인
         is_ended = False
-        current_time = datetime.now().timestamp()
+        current_time = (datetime.now().timestamp() + 9 * 60 * 60) * 1000
+        print(current_time)
         if (current_time > ballot.end_time):
             is_ended = True
 
@@ -211,6 +213,7 @@ def join_vote (request):
                 "candidate_list": json.decoder.JSONDecoder().decode(rows[0].candidate_list),
                 "start_time": rows[0].start_time,
                 "end_time": rows[0].end_time,
+                "address": rows[0].address,
                 "is_ended": is_ended,
                 "winner": winner,
                 "result": vote_result
