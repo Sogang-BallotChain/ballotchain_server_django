@@ -243,10 +243,10 @@ def profile (request):
 
             # Find User <-> Ballot join relation
             if (flag == "join"):
-                rows = UserBallot.objects.filter(user=user)
+                rows = UserBallot.objects.filter(user=user).order_by('-id')
             # Find User <-> Ballot register relation
             elif (flag == "register"):
-                rows = UserBallotRegister.objects.filter(user=user)
+                rows = UserBallotRegister.objects.filter(user=user).order_by('-id')
             else:
                 return JsonResponse({"success": 0, "message": "Flag not defined"})
 
