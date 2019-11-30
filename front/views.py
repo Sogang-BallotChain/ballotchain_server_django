@@ -6,5 +6,6 @@ from django.http import HttpResponse
 
 
 def index(request):
-    return redirect("http://localhost:5000")
+	return redirect("http://www.ballotchain.net:3000")
+    #return redirect("http://localhost:5000")
     #return HttpResponse("Hello, world. You're at the Sogang univ. Ballotchain team.")
