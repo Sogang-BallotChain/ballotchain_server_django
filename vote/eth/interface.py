@@ -33,6 +33,7 @@ def requestGas (pub_key):
 
     # If user have already much ehter, pass
     if (eth_amount >= 0.8):
+        print("Enough gas to: ", pub_key)
         return 1
     # else, request user from faucet
     else:
@@ -77,7 +78,7 @@ class Deployer:
         construct_txn = self.Contract.constructor(self.nCandidates, self.start_time, self.end_time).buildTransaction({
             'from': account.address,
             'nonce': w3.eth.getTransactionCount(account.address),
-            'gas': 4396860,
+            'gas': 8000000, #4396860,
             'gasPrice': w3.toWei('15', 'gwei')
         })
 
@@ -115,14 +116,13 @@ class BallotContract:
         txn = self.contract.functions.vote(vote_to).buildTransaction({
             'from': self.account.address,
             'nonce': self.w3.eth.getTransactionCount(self.account.address),
-            'gas': 4396860,
-            'gasPrice': self.w3.toWei('15', 'gwei')
+            'gas': 8000000, #4396860,
+            'gasPrice': self.w3.toWei('45', 'gwei')
         })
         signed = self.account.signTransaction(txn)
         tx_hash = self.w3.eth.sendRawTransaction(signed.rawTransaction)
         tx_receipt = self.w3.eth.waitForTransactionReceipt(tx_hash)
         print(tx_receipt)
-        print(tx_receipt['blockHash'])
         return 1
         
     def getWinner(self):

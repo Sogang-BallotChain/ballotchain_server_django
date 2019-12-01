@@ -41,11 +41,26 @@ def _requestGas(addr):
     print(tx_receipt)
 '''
 
+def _requestGas(addr):
+        coinbase = "0x6b082d847a9f469ca2eba8e19bc2d3a8c3a2dcee"
+        w3 = Web3(HTTPProvider(config.rpc_url))
+        w3.geth.personal.unlockAccount(Web3.toChecksumAddress(coinbase), "ballotchain", 1000)
+        tx_hash = w3.eth.sendTransaction({
+            'from': Web3.toChecksumAddress(coinbase),
+            'to': addr,
+            'gas': 4396860,
+            'gasPrice': w3.toWei('15', 'gwei'),
+            'value': w3.toWei(1,'ether')
+        })
+        tx_receipt = w3.eth.waitForTransactionReceipt(tx_hash)
+        print(tx_receipt)
+
+x = w3.eth.getBalance(Web3.toChecksumAddress("0x6b082d847a9f469ca2eba8e19bc2d3a8c3a2dcee"))
+print(w3.fromWei(x, "ether"))
+
 '''
 import threading
 for i in range(5):
-    t = threading.Thread(target=_requestGas, args=('0x71bA9810B39a276228B7749EbdB7CA59C6a12d10',))
+    t = threading.Thread(target=_requestGas, args=('0x8701BFB39Bc2bC2765Bc1f9EA8dFb284121bcd6F',))
     t.start()
 '''
-x = w3.eth.getBalance(Web3.toChecksumAddress("0x6b082d847a9f469ca2eba8e19bc2d3a8c3a2dcee"))
-print(w3.fromWei(x, "ether"))
