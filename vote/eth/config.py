@@ -44,3 +44,4 @@ connection_pool = [
 
 rpc_url = connection_pool[0]['rpc_url']
 coinbase = connection_pool[0]['coinbase']
+master = "0x79144f818edcafb2827098b9bd370839990c6fde28f4756d62342dec2a92c1f2"
