@@ -37,7 +37,7 @@ def requestGas (pub_key):
         tx_hash = w3.eth.sendTransaction({
             'from': Web3.toChecksumAddress(coinbase),
             'to': addr,
-            'gas': 4396860,
+            'gas': 3840930,
             'gasPrice': w3.toWei('15', 'gwei'),
             'value': w3.toWei(1,'ether')
         })
@@ -96,7 +96,7 @@ class Deployer:
         construct_txn = self.Contract.constructor(self.nCandidates, self.start_time, self.end_time).buildTransaction({
             'from': account.address,
             'nonce': w3.eth.getTransactionCount(account.address),
-            'gas': 8000000, #4396860,
+            'gas': 3840930, #4396860,
             'gasPrice': w3.toWei('15', 'gwei')
         })
 
@@ -134,7 +134,7 @@ class BallotContract:
         txn = self.contract.functions.vote(vote_to).buildTransaction({
             'from': self.account.address,
             'nonce': self.w3.eth.getTransactionCount(self.account.address),
-            'gas': 8000000, #4396860,
+            'gas': 3840930, #4396860,
             'gasPrice': self.w3.toWei('45', 'gwei')
         })
         signed = self.account.signTransaction(txn)

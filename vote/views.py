@@ -49,8 +49,6 @@ def register_vote (request):
             # Make geth connection
             if (makeConnection() == False):
                 return JsonResponse({"success": 0, "message": "None of nodes is alive."})
-
-            print(config.rpc_url)
             
             # Get gas from faucet
             request_gas = requestGas(user.eth_pub_key)
