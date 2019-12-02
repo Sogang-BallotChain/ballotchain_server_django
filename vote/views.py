@@ -13,7 +13,7 @@ from .models import Ballot, Verification
 
 from eth_account import Account
 from web3 import Web3, HTTPProvider
-from .eth.interface import Deployer, BallotContract, requestGas
+from .eth.interface import Deployer, BallotContract, requestGas, makeConnection
 from .eth import config
 
 import json
@@ -46,6 +46,12 @@ def register_vote (request):
                 return JsonResponse({"success": 0, "message": "No such user"})
             user = rows[0]
 
+            # Make geth connection
+            if (makeConnection() == False):
+                return JsonResponse({"success": 0, "message": "None of nodes is alive."})
+
+            print(config.rpc_url)
+            
             # Get gas from faucet
             request_gas = requestGas(user.eth_pub_key)
             if (request_gas == 0):
@@ -151,6 +157,10 @@ def join_vote (request):
             rows = UserBallot.objects.filter(user=user, ballot=ballot)
             if (len(rows) > 0):
                 return JsonResponse({"success": 0, "message": "Duplicate voting"})
+
+            # Make geth connection
+            if (makeConnection() == False):
+                return JsonResponse({"success": 0, "message": "None of nodes is alive."})
 
             # Get gas from faucet
             request_gas = requestGas(user.eth_pub_key)

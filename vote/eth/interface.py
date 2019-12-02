@@ -8,11 +8,30 @@ from web3 import Web3, HTTPProvider
 from . import src
 from . import config
 
+
+def makeConnection ():
+    def checkConnection(idx):
+        try:
+            response = requests.get(config.connection_pool[idx]['rpc_url'])
+            return True 
+        except(requests.exceptions.ConnectionError):
+            pass
+        return False
+
+    for i in range(len(config.connection_pool)):
+        ret = checkConnection(i)
+        if (ret == True):
+            config.rpc_url = config.connection_pool[i]['rpc_url']
+            config.coinbase = config.connection_pool[i]['coinbase']
+            print("Connect to node ", i + 1)
+            return True
+    return False
+
 # Request gas from faucet
 def requestGas (pub_key):
 
     def _requestGas(addr):
-        coinbase = "0x6b082d847a9f469ca2eba8e19bc2d3a8c3a2dcee"
+        coinbase = config.coinbase
         w3 = Web3(HTTPProvider(config.rpc_url))
         w3.geth.personal.unlockAccount(Web3.toChecksumAddress(coinbase), "ballotchain", 1000)
         tx_hash = w3.eth.sendTransaction({
@@ -51,12 +70,11 @@ def requestGas (pub_key):
     
 class Deployer:
 
-    rpc_url = config.rpc_url
-
     def __init__ (self, _nCandidates, _start, _end):
         self.nCandidates = _nCandidates
         self.start_time = _start
         self.end_time = _end
+        self.rpc_url = config.rpc_url
 
         # Compile source
         w3 = Web3(HTTPProvider(self.rpc_url))

@@ -14,8 +14,33 @@ master = "0x41c5c3326bb54c3fad0192672805f8e69d8d368c1545805655935d58a0db497e"
 faucet_url = "http://www.ballotchain.net:9000"
 '''
 
-# Node1 configuration
+# Node0 configuration
 # pub_key -> 0x2d1C36bfdFf49290Daa4F1CC66F3a61963f6d9A2, 0x569519ba44a386951f7212842e4e405b2d342a14 (locals-faucet)
+'''
 rpc_url = "http://44.227.84.27:8805"
 master = "0x79144f818edcafb2827098b9bd370839990c6fde28f4756d62342dec2a92c1f2"
 faucet_url = "http://44.227.84.27:9000"
+coinbase = "0x6b082d847a9f469ca2eba8e19bc2d3a8c3a2dcee"
+'''
+
+# Node 1, 2, 3 configuration
+connection_pool = [
+    {
+        # Node 1
+        'rpc_url': "http://44.229.82.215:8805",
+        'coinbase': "0x61c657b1f2bcb975c0c62a10922a6ec5ca7a3fbb"
+    },
+    {
+        # Node 2
+        'rpc_url': "http://44.228.100.192:8805",
+        'coinbase': "0x5715a4d0664220a29e4b75bbecf236a81c5746cc"
+    },
+    {
+        # Node 3
+        'rpc_url': "http://44.228.43.11:8805",
+        'coinbase': "0x902005a72a986959c015ddfe05403b7a2498ee1b"
+    }
+]
+
+rpc_url = connection_pool[0]['rpc_url']
+coinbase = connection_pool[0]['coinbase']
