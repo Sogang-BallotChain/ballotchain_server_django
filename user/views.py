@@ -27,6 +27,10 @@ def signup(request):
             if (not email or not password):
                 return JsonResponse({"success" : 0, "message": "Invalid json body"})
 
+            # Check sogang email
+            if (len(email.split('@')) != 2 or email.split('@')[-1] != "sogang.ac.kr"):
+                return JsonResponse({"success": 0, "message": "Invalid email format: sogang.ac.kr is required."})
+
             # Duplicate user
             row = models.User.objects.filter(email = req_json['email'])
             if (len(row) > 0):
@@ -37,7 +41,6 @@ def signup(request):
             account = w3.eth.account.create(password)
             pub_key = account.address
             prv_key = account.privateKey.hex()
-            #pub_key = w3.geth.personal.newAccount(password)
             
             # Create new user 
             user = models.User(

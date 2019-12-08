@@ -160,6 +160,11 @@ def join_vote (request):
             if (len(rows) > 0):
                 return JsonResponse({"success": 0, "message": "Duplicate voting"})
 
+            # Check whether ballot ended
+            current_time = (datetime.now().timestamp() + 9 * 60 * 60) * 1000
+            if (current_time > ballot.end_time):
+                return JsonResponse({"success": 0, "message": "Ballot is end. Can not vote to the ballot."})
+
             # Make geth connection
             if (makeConnection() == False):
                 return JsonResponse({"success": 0, "message": "None of nodes is alive."})
@@ -204,6 +209,10 @@ def join_vote (request):
         print(current_time)
         if (current_time > ballot.end_time):
             is_ended = True
+
+        # Make geth connection
+        if (makeConnection() == False):
+            return JsonResponse({"success": 0, "message": "None of nodes is alive."})
 
         ballotContract = BallotContract(ballot.address, config.master)
         candidate_list = json.decoder.JSONDecoder().decode(rows[0].candidate_list)
