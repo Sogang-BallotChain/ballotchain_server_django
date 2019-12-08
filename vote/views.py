@@ -23,6 +23,7 @@ from django.core.mail import EmailMessage
 import random
 import time
 
+
 # uri vote/register/
 @csrf_exempt
 def register_vote (request):
@@ -176,16 +177,15 @@ def join_vote (request):
             
             # Call contract, if fail, then return success 0
             ballotContract = BallotContract(ballot.address, user.eth_prv_key)
-            status = ballotContract.vote(candidate)
-            if (status == 0):
-                return JsonResponse({"success": 0, "message": "Duplicate voting"})
-
+            receipt = ballotContract.vote(candidate)
+            
             # User <-> Ballot join relation insert
             userballot = UserBallot(
                 user = user,
                 ballot = ballot
             )
             userballot.save()
+
             return JsonResponse({"success": 1})
 
         except(RuntimeError, NameError):

@@ -141,7 +141,7 @@ class BallotContract:
         tx_hash = self.w3.eth.sendRawTransaction(signed.rawTransaction)
         tx_receipt = self.w3.eth.waitForTransactionReceipt(tx_hash)
         print(tx_receipt)
-        return 1
+        return tx_receipt
         
     def getWinner(self):
         return self.contract.functions.showWinner().call()

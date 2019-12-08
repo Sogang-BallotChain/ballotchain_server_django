@@ -64,7 +64,6 @@ def signup(request):
 def signin(request):
     if (request.method == "POST"):
         try:
-
             # Check json body
             req_json = json.loads(request.body.decode("utf-8"))
             email = req_json.get("email", None)
