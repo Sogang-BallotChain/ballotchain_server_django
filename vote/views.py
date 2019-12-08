@@ -97,6 +97,10 @@ def info (request, vote_id):
     if (current_time > ballot.end_time):
         is_ended = True
 
+    # Make geth connection
+        if (makeConnection() == False):
+            return JsonResponse({"success": 0, "message": "None of nodes is alive."})
+
     ballotContract = BallotContract(ballot.address, config.master)
     candidate_list = json.decoder.JSONDecoder().decode(
         rows[0].candidate_list)

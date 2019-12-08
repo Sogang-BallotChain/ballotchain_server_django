@@ -4,6 +4,7 @@ from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import auth
+from django.contrib.auth.hashers import make_password, check_password
 
 from . import models
 import json
@@ -41,7 +42,7 @@ def signup(request):
             # Create new user 
             user = models.User(
                 email = email, 
-                password = password, 
+                password = make_password(password),
                 eth_pub_key = pub_key, 
                 eth_prv_key = prv_key
             )
@@ -60,15 +61,23 @@ def signup(request):
 def signin(request):
     if (request.method == "POST"):
         try:
-            #TODO: check fields
 
-            # check user sign up
+            # Check json body
             req_json = json.loads(request.body.decode("utf-8"))
-            rows = models.User.objects.filter(email = req_json["email"], password = req_json["password"])
+            email = req_json.get("email", None)
+            password = req_json.get("password", None)
+            if (email is None or password is None):
+                return JsonResponse({"success" : 0, "message": "Invalid json body"})
+            
+            # check user sign up
+            rows = models.User.objects.filter(email = email)
             if (len(rows) <= 0):
                 return JsonResponse({"success": 0, "message": "No user with such email."})
             else:
-                return JsonResponse({"success": 1})
+                if (check_password(password, rows[0].password) == True):
+                    return JsonResponse({"success": 1})
+                else:
+                    return JsonResponse({"success": 0, "message": "Wrong password."})
         except (RuntimeError, NameError):
             return JsonResponse({"success": 0, "message": "Server error"})
 
