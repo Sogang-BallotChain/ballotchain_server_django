@@ -35,6 +35,7 @@ def register_vote (request):
             email = req_json.get('email', None)
             name = req_json.get('name', None)
             candidate_list = req_json.get('candidate_list', None)
+            voter_list = req_json.get('voter_list', [])
             start_time = req_json.get('start_time', None)
             end_time = req_json.get('end_time', None)
 
@@ -64,6 +65,7 @@ def register_vote (request):
             ballot  = Ballot (
                 name = name, 
                 candidate_list = json.dumps(candidate_list, ensure_ascii=False),
+                voter_list = json.dumps(voter_list, ensure_ascii=False),
                 start_time = start_time,
                 end_time = end_time,
                 address = address
@@ -121,6 +123,7 @@ def info (request, vote_id):
         "data": {
             "name": rows[0].name,
             "candidate_list": json.decoder.JSONDecoder().decode(rows[0].candidate_list),
+            "voter_list": json.decoder.JSONDecoder().decode(rows[0].voter_list),
             "start_time": rows[0].start_time,
             "end_time": rows[0].end_time,
             "address": rows[0].address,
@@ -155,6 +158,12 @@ def join_vote (request):
             if (len(rows) <= 0):
                 return JsonResponse({"success": 0, "message": "No such ballot."})
             ballot = rows[0]
+
+            # Check whether user is allowed to vote
+            voter_list = json.decoder.JSONDecoder().decode(ballot.voter_list)
+            if (len(voter_list) > 0):
+                if (email in ballot.voter_list) == False:
+                    return JsonResponse({"success": 0, "message": "You are not allowed."})
 
             # Check whether user already voted
             rows = UserBallot.objects.filter(user=user, ballot=ballot)
